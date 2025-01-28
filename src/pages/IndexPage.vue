@@ -1,5 +1,11 @@
 <template>
   <q-page>
+    <div class="q-pa-md">
+      <q-input v-model="studentId" type="number" label="StudentId" outlined />
+    </div>
+    <pre>
+      {{ student }}
+    </pre>
     <div class="row justify-center">
       <q-card class="my-card col">
         <img src="https://cdn.quasar.dev/img/mountains.jpg">
@@ -50,25 +56,47 @@
     <div>
       {{ person }}
     </div>
+
+    <q-btn @click="sendUser" color="green">sendUser</q-btn>
+
+
+
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDatabaseList, useDatabaseObject } from 'vuefire'
-import { ref as dbRef } from 'firebase/database'
+import { ref as dbRef, set } from 'firebase/database'
 import { db } from 'src/boot/vuefire'
 const router = useRouter()
 
 const todos = useDatabaseList(dbRef(db, 'todos'))
 const person = useDatabaseObject(dbRef(db, 'person'))
-
+let student = useDatabaseObject(dbRef(db, 'students/1'))
+const studentId = ref(1)
 const name = ref("Kalle Kula")
 const h1 = ref()
 function goToSecond() {
   console.log("Du kom hit!")
   router.push('second')
+}
+
+watch(studentId, (val) => {
+  if (!val) {
+    return
+  }
+
+  student = useDatabaseObject(dbRef(db, 'students/' + val))
+})
+
+function sendUser() {
+  set(dbRef(db, 'users/' + 1), {
+    username: "Kalle",
+    email: "email",
+    profile_picture: "imageUrl"
+  });
 }
 </script>
 
